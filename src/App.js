@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { AppBar, Toolbar, Typography, Switch, CircularProgress } from '@material-ui/core';
 import WordCard from './components/WordCard.js';
-const randomWords = require('random-words')
+const randomWords = require('random-words');
 
 class App extends Component {
 
