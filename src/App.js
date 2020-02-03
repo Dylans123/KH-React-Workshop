@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import './App.css';
-import { AppBar, Toolbar, Typography, Card, CardContent, Switch, Container, Grid } from '@material-ui/core';
+import { AppBar, Toolbar, Typography, Switch, CircularProgress } from '@material-ui/core';
+import WordCard from './components/WordCard.js';
 const randomWords = require('random-words')
 
 class App extends Component {
@@ -16,7 +16,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    for(let i = 0; i < 25; ++i) {
+    for(let i = 0; i < 100; ++i) {
       const word = randomWords();
       fetch(`https://www.dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=387258a6-1127-496c-8533-8389f44db7d2`)
       .then(res => res.json())
@@ -30,9 +30,13 @@ class App extends Component {
           }
           words.push(curWord);
           this.setState({
-            isLoaded: true,
             words
           });
+          if (i === 99) {
+            this.setState({
+              isLoaded: true,
+            })
+          }
         },
         (error) => {
           this.setState({
@@ -49,14 +53,16 @@ class App extends Component {
   }
 
   render() {
-    const { words, darkMode } = this.state;
+    const { words, darkMode, isLoaded } = this.state;
     const darkColors = ['#BB86FC', '#3700B3', '#03DAC6'];
     const lightColors = ['#ACDDDE', '#E1F8DC', '#FFE7C7'];
-    console.log(words);
+    const mainBgColor = darkMode ? 'black' : 'white'
+    const textColor = darkMode ? 'white' : 'black';
+
     return (
-      <div style={{ backgroundColor: darkMode ? 'black' : 'white' }}>
+      <div style={{ backgroundColor: mainBgColor }}>
         <AppBar position="static">
-          <Toolbar style={{ backgroundColor: 'black' }}>
+          <Toolbar style={{ backgroundColor: mainBgColor, color: textColor }}>
             <Typography>
               Dictionary
             </Typography>
@@ -64,35 +70,27 @@ class App extends Component {
               checked={darkMode}
               onChange={() => this.handleSwitch()}
               value={darkMode}
+              color="primary"
               inputProps={{ 'aria-label': 'secondary checkbox' }}
             />
           </Toolbar>
         </AppBar>
-        <Container>
-          <Grid container direction="row">
+        {isLoaded
+        ? (
+          <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', padding: '50px' }}>
             {words.map((word) => {
               const bgColor = darkMode ? darkColors[Math.floor(Math.random() * 3)] : lightColors[Math.floor(Math.random() * 3)];
-              const textColor = darkMode ? 'white' : 'black';
               return (
-                <Grid container item xs={3} spacing={3}>
-                  <Card variant = "outlined" style={{ backgroundColor: bgColor, color: textColor, minWidth:"275px" }}>
-                    <CardContent>
-                      <Typography variant="h5" component="h2">
-                        {word.word}
-                      </Typography>
-                      <Typography>
-                        {word.type}
-                      </Typography>
-                      <Typography variant="body2" component="p">
-                        {word.def}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
+                <WordCard word={word} bgColor={bgColor} textColor={textColor}></WordCard>
               )
             })}
-          </Grid>
-        </Container>
+          </div>
+        )
+        : 
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100vw' }}>
+            <CircularProgress size={100}/>  
+          </div>
+      }
       </div>
     );
   }
